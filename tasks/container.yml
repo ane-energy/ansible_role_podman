@@ -20,6 +20,7 @@
       tags: pull
 
     - name: "Install file templates for container {{ container[0] }}"
+      become: true
       ansible.builtin.template:
         src: "{{ file.src }}"
         dest: "{{ file.dest }}"
@@ -32,6 +33,7 @@
         label: "{{ file.dest | d(file) }}"
 
     - name: "Install inline file templates for container {{ container[0] }}"
+      become: true
       ansible.builtin.copy:
         dest: "{{ file.dest }}"
         content: "{{ file.content }}"
