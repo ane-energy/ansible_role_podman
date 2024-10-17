@@ -19,32 +19,6 @@
       register: image_pull_result
       tags: pull
 
-    - name: "Install file templates for container {{ container[0] }}"
-      become: true
-      ansible.builtin.template:
-        src: "{{ file.src }}"
-        dest: "{{ file.dest }}"
-        mode: "{{ file.mode | d(omit) }}"
-        owner: "{{ file.owner | d(omit) }}"
-        group: "{{ file.group | d(omit) }}"
-      loop: "{{ c.templates | d([]) }}"
-      loop_control:
-        loop_var: file
-        label: "{{ file.dest | d(file) }}"
-
-    - name: "Install inline file templates for container {{ container[0] }}"
-      become: true
-      ansible.builtin.copy:
-        dest: "{{ file.dest }}"
-        content: "{{ file.content }}"
-        mode: "{{ file.mode | d(omit) }}"
-        owner: "{{ file.owner | d(omit) }}"
-        group: "{{ file.group | d(omit) }}"
-      loop: "{{ c.copy_template | d([]) }}"
-      loop_control:
-        loop_var: file
-        label: "{{ file.dest | d(file) }}"
-
     - name: "Create volumes for container {{ container[0] }}"
       when: "'__file__' not in container_volume and c.volume != []"
       become: true
@@ -57,6 +31,32 @@
       # this will fail if the volume exists and is not a dir
       # this is ok - error handling will be added later
       ignore_errors: true
+
+    - name: "Install file templates for container {{ container[0] }}"
+      become: true
+      ansible.builtin.template:
+        src: "{{ file.src }}"
+        dest: "{{ file.dest | replace('__basedir__', basedir | d('')) }}"
+        mode: "{{ file.mode | d(omit) }}"
+        owner: "{{ file.owner | d(omit) }}"
+        group: "{{ file.group | d(omit) }}"
+      loop: "{{ c.templates | d([]) }}"
+      loop_control:
+        loop_var: file
+        label: "{{ file.dest | d(file) }}"
+
+    - name: "Install inline file templates for container {{ container[0] }}"
+      become: true
+      ansible.builtin.copy:
+        dest: "{{ file.dest | replace('__basedir__', basedir | d('')) }}"
+        content: "{{ file.content }}"
+        mode: "{{ file.mode | d(omit) }}"
+        owner: "{{ file.owner | d(omit) }}"
+        group: "{{ file.group | d(omit) }}"
+      loop: "{{ c.copy_template | d([]) }}"
+      loop_control:
+        loop_var: file
+        label: "{{ file.dest | d(file) }}"
 
     - name: "Update volume strings for container {{ container[0] }}"
       when: c.volume is defined
@@ -189,6 +189,7 @@
         volumes_from: "{{ c.volumes_from | d(omit) }}"
         workdir: "{{ c.workdir | d(omit) }}"
       register: out
+      ignore_errors: "{{ ansible_check_mode }}"
 
 #    - ansible.builtin.debug:
 #        var: out
