@@ -9,6 +9,7 @@
       vars:
         packages_present: "{{ packages_present_podman }}"
         call_from: podman role
+        repos: []
       tags: install
 
     - name: "Configure custom registry for DockerHub"
