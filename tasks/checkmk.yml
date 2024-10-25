@@ -1,0 +1,30 @@
+---
+- name: "Create Check Script directory"
+  become: true
+  ansible.builtin.file:
+    path: /usr/lib/check_mk_agent/scripts
+    state: directory
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: "Install Container Stats Nagios Plugin"
+  become: true
+  ansible.builtin.copy:
+    src: templates/checkmk/check_container_stats_podman.py
+    dest: /usr/lib/check_mk_agent/scripts/check_container_stats_podman.py
+    owner: root
+    group: root
+    mode: 0755
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: "Configure CheckMK MRPE for Container Stats Nagios Plugin"
+  become: true
+  ansible.builtin.blockinfile:
+    path: /etc/checkmk/mrpe.cfg
+    block: |
+      # podman container stats
+      {# loop pods #}
+      {% for pod in podman.pods %}
+      container_checkmk_infra /usr/lib/check_mk_agent/scripts/check_container_stats_podman.py -c checkmk_infra
+      {% endfor %}
+    create: true
+  ignore_errors: "{{ ansible_check_mode }}"

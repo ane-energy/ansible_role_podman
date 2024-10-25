@@ -50,3 +50,11 @@
       tags:
         - container
         - pull
+
+    - name: "Configure Monitoring"
+      ansible.builtin.import_tasks: checkmk.yml
+      tags:
+        - never
+        - checkmk
+        - cmk
+        - monitoring
