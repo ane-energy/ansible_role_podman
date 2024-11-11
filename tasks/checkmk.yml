@@ -16,15 +16,15 @@
     mode: 0755
   ignore_errors: "{{ ansible_check_mode }}"
 
-- name: "Configure CheckMK MRPE for Container Stats Nagios Plugin"
-  become: true
-  ansible.builtin.blockinfile:
-    path: /etc/checkmk/mrpe.cfg
-    block: |
-      # podman container stats
-      {# loop pods #}
-      {% for pod in podman.pods %}
-      container_checkmk_infra /usr/lib/check_mk_agent/scripts/check_container_stats_podman.py -c checkmk_infra
-      {% endfor %}
-    create: true
-  ignore_errors: "{{ ansible_check_mode }}"
+#- name: "Configure CheckMK MRPE for Container Stats Nagios Plugin"
+#  become: true
+#  ansible.builtin.blockinfile:
+#    path: /etc/checkmk/mrpe.cfg
+#    block: |
+#      # podman container stats
+#      {# loop pods #}
+#      {% for pod in podman.pods %}
+#      container_checkmk_infra /usr/lib/check_mk_agent/scripts/check_container_stats_podman.py -c checkmk_infra
+#      {% endfor %}
+#    create: true
+#  ignore_errors: "{{ ansible_check_mode }}"
