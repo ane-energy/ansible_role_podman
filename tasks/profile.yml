@@ -1,0 +1,7 @@
+---
+- name: "Add /etc/profile.d/podman.sh"
+  ansible.builtin.include_role:
+    name: "{{ __fqcn_profile__ }}"
+  vars:
+    profile: "{{ profile_podman }}
+"

@@ -1,0 +1,23 @@
+---
+profile_podman:
+  inline:
+    - name: podman.sh
+      content: |
+        #!/usr/bin/env bash
+        # {{ role_managed }}
+        [ $USER == "root" ] && {
+        {# exit when podman is not installed #}
+          [ -f $(which podman) ] && {
+            echo -e "\n=== Podman Status ========================================="
+        {#  loop pods #}
+            for pod in $(ls /etc/systemd/system/pod-* 2> /dev/null | awk -F '/' '{print $NF}'); do
+              podname=$(echo $pod | sed 's/.service//' | sed 's/pod-//')
+              echo "Pod $podname: $(systemctl is-active $pod)"
+        {#    loop containers for pod #}
+              for c in $(ls /etc/systemd/system/container-${podname}* 2> /dev/null | awk -F '/' '{print $NF}'); do
+                cname=$(echo $c | sed 's/.service//' | sed 's/container-//')
+                echo -e "\tContainer $cname: $(systemctl is-active $c)"
+              done
+            done
+          }
+        }

@@ -51,6 +51,11 @@
         - container
         - pull
 
+    - name: "Configure /etc/profile.d/podman.sh"
+      ansible.builtin.import_tasks: profile.yml
+      tags:
+        - profile
+
     - name: "Configure Monitoring"
       ansible.builtin.import_tasks: checkmk.yml
       tags:
