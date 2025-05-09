@@ -40,7 +40,7 @@
 - name: "Create pod {{ pname }}"
   become: true
   vars:
-    infra: "{{ true if (pod.share is defined and pod.share) else false }}"
+    infra: "{{ true if ((pod.share is defined and pod.share) or (pod.infra is defined and pod.infra)) else false }}"
   containers.podman.podman_pod:
     add_host: "{{ pod.add_host | d(omit) }}"
     blkio_weight: "{{ pod.blkio_weight | d(omit) }}"
