@@ -1,4 +1,8 @@
 ---
+podman_prune_vars:
+  - system
+  - image
+
 profile_podman:
   inline:
     - name: podman.sh

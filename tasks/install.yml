@@ -1,0 +1,8 @@
+---
+- name: "Install required packages"
+  ansible.builtin.include_role:
+    name: "{{ __fqcn_packages__ }}"
+  vars:
+    packages_present: "{{ packages_present_podman }}"
+    call_from: podman role
+    repos: []

@@ -3,22 +3,15 @@
 - name: "Execute podman tasks when podman is defined"
   when: podman is defined
   block:
-    - name: "Install required packages"
-      ansible.builtin.include_role:
-        name: "{{ __fqcn_packages__ }}"
-      vars:
-        packages_present: "{{ packages_present_podman }}"
-        call_from: podman role
-        repos: []
+    - name: "Install podman"
+      ansible.builtin.import_tasks: install.yml
       tags: install
 
-    - name: "Configure custom registry for DockerHub"
-      become: true
-      ansible.builtin.copy:
-        dest: /etc/containers/registries.conf.d/custom.conf
-        content: |
-          # {{ role_managed }}
-          unqualified-search-registries = ['docker.io']
+    - name: "Configure podman"
+      ansible.builtin.import_tasks: config.yml
+      tags:
+        - config
+        - configure
 
     - name: "Configure podman networks"
       when: network | d(podnet.name) == podnet.name

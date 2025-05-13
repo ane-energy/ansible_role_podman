@@ -1,0 +1,62 @@
+---
+- name: "Configure custom registry for DockerHub"
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/containers/registries.conf.d/custom.conf
+    content: |
+      # {{ role_managed }}
+      unqualified-search-registries = ['docker.io']
+
+- name: "Configure podman storage"
+  when: podman_storage is defined
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/containers/storage.conf
+    content: |
+      # {{ role_managed }}
+      [storage]
+      driver = "{{ podman_storage.driver }}"
+      runroot = "{{ podman_storage.runroot | d('/run/containers/storage') }}"
+      graphroot = "{{ podman_storage.graphroot | d('/var/lib/containers/storage') }}"
+
+- when: podman_prune is defined
+        and podman_prune in podman_prune_vars
+  block:
+    - name: "Install podman prune systemd unit"
+      become: true
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/podman-prune.service
+        content: |
+          # {{ role_managed }}
+          [Unit]
+          Description=Podman Prune Service
+          After=docker.service
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/bin/podman {{ podman_prune }} prune -a -f
+      notify: "Execute systemd daemon-reload"
+
+    - name: "Install podman prune systemd timer"
+      become: true
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/podman-prune.timer
+        content: |
+          # {{ role_managed }}
+          [Unit]
+          Description=Podman Prune Timer
+          [Timer]
+          Unit=podman-prune.service
+          Persistent=true
+          OnCalendar={{ podman_prune_interval }}
+      notify: "Execute systemd daemon-reload"
+
+    - name: "Flush handlers to ensure systemd is reloaded"
+      ansible.builtin.meta: flush_handlers
+
+    - name: "Start and enable podman-prune timer"
+      become: true
+      ansible.builtin.systemd:
+        name: podman-prune.timer
+        state: started
+        enabled: true
+      ignore_errors: "{{ ansible_check_mode }}"
