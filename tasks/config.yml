@@ -33,7 +33,7 @@
           After=docker.service
           [Service]
           Type=oneshot
-          ExecStart=/usr/bin/podman {{ podman_prune }} prune -a -f
+          ExecStart=/usr/bin/podman {{ podman_prune }} prune {{ podman_prune_args | join(' ') }}
       notify: "Execute systemd daemon-reload"
 
     - name: "Install podman prune systemd timer"

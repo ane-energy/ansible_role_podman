@@ -20,3 +20,10 @@ podman_systemd_defaults:
   after: network-online.target
 
 pod_yml_path: "../../../../../files/pods"
+
+podman_prune_args:
+  - --all     # Remove all unused images not just dangling ones
+  - --force   # Do not prompt for confirmation
+  - --volumes # Purge anonymous volumes
+
+podman_prune_interval: "daily"
